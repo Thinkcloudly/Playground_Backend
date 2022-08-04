@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { urlencoded, json } from 'body-parser';
 import { environmentController } from './controllers/environment.controller';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
+import serverless from 'serverless-http'
 dotenv.config();
 
 const app: Express = express();
@@ -19,7 +20,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server');
 });
 
-app.use('/api', (req: Request, res: Response, next) => {
+app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
   req.awsClient = new CloudFormationClient({
     "credentials": {
       accessKeyId: `${process.env.AWS_ID}`,
@@ -30,8 +31,8 @@ app.use('/api', (req: Request, res: Response, next) => {
   req.awsClient.config.logger = console;
   next()
 });
-app.use('/api', environmentController);
+app.use('/.netlify/functions/api', environmentController);
 
-app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-});
+
+module.exports = app;
+module.exports.handler = serverless(app);
