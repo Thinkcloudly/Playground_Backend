@@ -15,6 +15,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@aws-sdk/client-cloudformation": "^3.137.0",
+		"@aws-sdk/client-ec2": "^3.145.0",
 		"aws-sdk": "^2.1183.0",
 		"body-parser": "^1.20.0",
 		"dotenv": "^16.0.1",
