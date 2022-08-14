@@ -73,6 +73,7 @@ router.post('/validate-scenario-1', async (req: Request, res: Response) => {
          * if (error.name === 'SomeServiceException') {
          * 
          **/
+        res.status(500).send({ ...error })
     }
 });
 export default router;
