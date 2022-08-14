@@ -77,7 +77,7 @@ router.post('/validate-env', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-        res.send({ ...data });
+        res.send({ StackStatus: data.Stacks[0].StackStatus, ...data });
         // process data.
     } catch (error: any) {
         // error handling.
