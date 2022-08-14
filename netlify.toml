@@ -2,3 +2,7 @@
 [build]
   command = "npm install && npm run build"
   functions = "functions" #  netlify-lambda reads this
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
