@@ -13,14 +13,8 @@ const port = process.env.PORT || 3000;
 
 // parse application/x-www-form-urlencoded
 app.use(urlencoded({ extended: false }))
-// app.options('*', cors())
 // parse application/json
 app.use(json())
-
-app.use(cors({
-  origin: '*',
-  // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}))
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server');
