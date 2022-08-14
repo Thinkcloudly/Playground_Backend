@@ -15,7 +15,9 @@ const port = process.env.PORT || 3000;
 app.use(urlencoded({ extended: false }))
 // parse application/json
 app.use(json())
-
+app.use(cors({
+  origin: '*'
+}))
 app.use('./', (req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*']);
   res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
