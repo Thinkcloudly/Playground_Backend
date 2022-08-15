@@ -34,7 +34,7 @@ app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
       accessKeyId: `${process.env.AWS_ID}`,
       secretAccessKey: `${process.env.AWS_SECRET}`
     },
-    region: `${process.env.AWS_REGION}`
+    region: `${process.env.AWS_ENV_REGION}`
   });
   req.awsClient.config.logger = console;
   next()

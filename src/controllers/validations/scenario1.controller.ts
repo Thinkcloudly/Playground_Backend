@@ -20,6 +20,8 @@ router.post('/validate-scenario-1', async (req: Request, res: Response) => {
         //     console.log(element.LogicalResourceId);
 
         // });
+        console.log(data);
+
         let Resources: any[] = data.StackResources.map(element => {
             return {
                 LogicalResourceId: element.LogicalResourceId,
@@ -38,11 +40,13 @@ router.post('/validate-scenario-1', async (req: Request, res: Response) => {
                 accessKeyId: `${process.env.AWS_ID}`,
                 secretAccessKey: `${process.env.AWS_SECRET}`
             },
-            region: `${process.env.AWS_REGION}`
+            region: `${process.env.AWS_ENV_REGION}`
         });
 
+
+
         let scParams: DescribeVolumesCommandInput = {
-            MaxResults: 10,
+            MaxResults: 100,
             Filters: [
                 {
                     "Name": "attachment.instance-id",
@@ -52,6 +56,7 @@ router.post('/validate-scenario-1', async (req: Request, res: Response) => {
         }
         let scCmd = new DescribeVolumesCommand(scParams)
         let results = await ec2Client.send(scCmd);
+        console.log(results);
         if (results.Volumes.find(x => x.VolumeId == ebsId.PhysicalResourceId)) {
             return res.send({
                 status: "success",
@@ -61,7 +66,8 @@ router.post('/validate-scenario-1', async (req: Request, res: Response) => {
 
         return res.send({
             status: "failed",
-            message: "scenario not completed"
+            message: "scenario not completed",
+            results
         })
         // process data.
     } catch (error: any) {
