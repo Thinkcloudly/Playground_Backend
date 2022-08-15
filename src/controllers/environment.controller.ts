@@ -65,7 +65,6 @@ router.post('/setup-env', async (req: Request, res: Response) => {
 
     }
 });
-
 router.post('/validate-env', async (req: Request, res: Response) => {
     let { stackId } = req.body;
     if (!stackId) {
@@ -79,7 +78,17 @@ router.post('/validate-env', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-        res.send({ StackStatus: data.Stacks[0].StackStatus, ...data });
+        let resp: any = { StackStatus: data.Stacks[0].StackStatus, ...data }
+        if (data.Stacks[0].StackStatus == "CREATE_COMPLETE") {
+            const params: DescribeStackResourcesCommandInput = {
+                StackName: `${stackId}`
+            };
+            const command = new DescribeStackResourcesCommand(params);
+            const data = await req.awsClient.send(command);
+            return res.send({ ...resp, StackResources: data.StackResources });
+
+        }
+        res.send(res);
         // process data.
     } catch (error: any) {
         // error handling.
@@ -122,8 +131,6 @@ router.post('/env-res', async (req: Request, res: Response) => {
          **/
     }
 });
-
-
 router.post('/delete-env', async (req: Request, res: Response) => {
     let { stackId } = req.body;
     if (!stackId) {
