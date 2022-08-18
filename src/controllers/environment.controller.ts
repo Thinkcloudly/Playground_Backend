@@ -11,6 +11,7 @@ import {
     DescribeStackResourcesCommandInput,
     DescribeStackResourcesCommand
 } from "@aws-sdk/client-cloudformation";
+import { IAMClient, CreateUserCommand, CreateLoginProfileCommand, DeleteUserCommand, DeleteLoginProfileCommand, AttachUserPolicyCommand, DetachUserPolicyCommand } from "@aws-sdk/client-iam"; // ES Modules 
 import { scenario1Controller } from './validations/scenario1.controller';
 
 declare module "express-serve-static-core" {
@@ -48,7 +49,40 @@ router.post('/setup-env', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-        res.send({ ...data });
+
+        const iamClient = new IAMClient({
+            "credentials": {
+                accessKeyId: `${process.env.AWS_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET}`
+            },
+            region: `${process.env.AWS_ENV_REGION}`
+        });
+        const createUsercommand = new CreateUserCommand({
+            UserName: `${req.body.environment}-${req.body.userId}-${Date.now()}`
+        });
+        const createUserresponse = await iamClient.send(createUsercommand);
+        let password = `${req.body.environment}-${req.body.userId}-${Date.now()}`
+        const createLoginProfileCommand = new CreateLoginProfileCommand({
+            UserName: createUserresponse.User.UserName,
+            Password: password,
+            PasswordResetRequired: false
+        });
+        const createLoginProfileResponse = await iamClient.send(createLoginProfileCommand);
+        console.log(createLoginProfileResponse);
+        const attachUserPolicyCommand = new AttachUserPolicyCommand({
+            UserName: createUserresponse.User.UserName,
+            PolicyArn: "arn:aws:iam::aws:policy/PowerUserAccess"
+        });
+        const attachUserPolicyResponse = await iamClient.send(attachUserPolicyCommand);
+        console.log(attachUserPolicyResponse);
+
+        res.send({
+            ...data,
+            iamUser: {
+                userName: createUserresponse.User.UserName,
+                password: password
+            }
+        });
         // process data.
     } catch (error: any) {
         // error handling.
@@ -116,6 +150,7 @@ router.post('/env-res', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
+
         return res.send({ ...data });
         // process data.
     } catch (error: any) {
@@ -132,7 +167,7 @@ router.post('/env-res', async (req: Request, res: Response) => {
     }
 });
 router.post('/delete-env', async (req: Request, res: Response) => {
-    let { stackId } = req.body;
+    let { stackId, iamUserId } = req.body;
     if (!stackId) {
         res.status(400).send('Missing environment or userId');
         return;
@@ -144,7 +179,33 @@ router.post('/delete-env', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-        res.send({ ...data });
+        const iamClient = new IAMClient({
+            "credentials": {
+                accessKeyId: `${process.env.AWS_ID}`,
+                secretAccessKey: `${process.env.AWS_SECRET}`
+            },
+            region: `${process.env.AWS_ENV_REGION}`
+        });
+
+        const deleteLoginProfileCommand = new DeleteLoginProfileCommand({
+            UserName: `${iamUserId}`
+        });
+        const deleteLoginProfileResponse = await iamClient.send(deleteLoginProfileCommand);
+        console.log(deleteLoginProfileResponse);
+
+        const detachPolicyCommand = new DetachUserPolicyCommand({
+            UserName: `${iamUserId}`,
+            PolicyArn: "arn:aws:iam::aws:policy/PowerUserAccess"
+        });
+        const detachPolicyResponse = await iamClient.send(detachPolicyCommand);
+        console.log(detachPolicyResponse);
+
+        const deleteUserCommand = new DeleteUserCommand({
+            UserName: `${iamUserId}`
+        });
+        const deleteUserResponse = await iamClient.send(deleteUserCommand);
+        console.log(deleteUserResponse);
+        return res.send({ ...data });
         // process data.
     } catch (error: any) {
         // error handling.
