@@ -130,7 +130,7 @@ router.post('/validate-env', async (req: Request, res: Response) => {
             const { requestId, cfId, extendedRequestId } = error.$metadata;
             console.log({ requestId, cfId, extendedRequestId });
         }
-        res.status(500).send({ ...error })
+        res.status(500).send({ ...JSON.parse(JSON.stringify(error)) })
         /**
          * The keys within exceptions are also parsed.
          * You can access them by specifying exception names:
