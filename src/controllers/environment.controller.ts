@@ -126,8 +126,10 @@ router.post('/validate-env', async (req: Request, res: Response) => {
         // process data.
     } catch (error: any) {
         // error handling.
-        const { requestId, cfId, extendedRequestId } = error.$metadata;
-        console.log({ requestId, cfId, extendedRequestId });
+        if (error.$metadata) {
+            const { requestId, cfId, extendedRequestId } = error.$metadata;
+            console.log({ requestId, cfId, extendedRequestId });
+        }
         res.status(500).send({ ...error })
         /**
          * The keys within exceptions are also parsed.
