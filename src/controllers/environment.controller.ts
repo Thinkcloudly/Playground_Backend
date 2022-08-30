@@ -111,18 +111,24 @@ router.post('/validate-env', async (req: Request, res: Response) => {
     const command = new DescribeStacksCommand(params);
     // async/await.
     try {
+        console.log("executing DescribeStacksCommand");
+
         const data = await req.awsClient.send(command);
-        if (data.Stacks && data.Stacks[0].StackStatus == "CREATE_COMPLETE") {
-            const params: DescribeStackResourcesCommandInput = {
+        let resp: any = { ...data }
+        console.log("checking Status");
+        if (data.Stacks[0].StackStatus == "CREATE_COMPLETE") {
+            const resParams: DescribeStackResourcesCommandInput = {
                 StackName: `${stackId}`
             };
-            let resp: any = { StackStatus: data.Stacks[0].StackStatus, ...data }
-            const command = new DescribeStackResourcesCommand(params);
-            const resData = await req.awsClient.send(command);
-            return res.send({ ...resp, StackResources: resData.StackResources });
+            resp = { StackStatus: resp.Stacks[0].StackStatus, ...resp }
+            const command = new DescribeStackResourcesCommand(resParams);
+            console.log("executing DescribeStackResourcesCommand");
+            const data = await req.awsClient.send(command);
+            console.log("sending success Response DescribeStackResourcesCommand");
+            return res.send({ ...resp, StackResources: data.StackResources });
 
         }
-        res.send(res);
+        res.send({ ...resp });
         // process data.
     } catch (error: any) {
         // error handling.
@@ -130,7 +136,9 @@ router.post('/validate-env', async (req: Request, res: Response) => {
             const { requestId, cfId, extendedRequestId } = error.$metadata;
             console.log({ requestId, cfId, extendedRequestId });
         }
-        res.status(500).send({ ...JSON.parse(JSON.stringify(error)) })
+        console.log(error);
+        res.status(500).send({ error: error.message })
+
         /**
          * The keys within exceptions are also parsed.
          * You can access them by specifying exception names:
