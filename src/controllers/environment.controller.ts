@@ -112,14 +112,14 @@ router.post('/validate-env', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-        let resp: any = { StackStatus: data.Stacks[0].StackStatus, ...data }
-        if (data.Stacks[0].StackStatus == "CREATE_COMPLETE") {
+        if (data.Stacks && data.Stacks[0].StackStatus == "CREATE_COMPLETE") {
             const params: DescribeStackResourcesCommandInput = {
                 StackName: `${stackId}`
             };
+            let resp: any = { StackStatus: data.Stacks[0].StackStatus, ...data }
             const command = new DescribeStackResourcesCommand(params);
-            const data = await req.awsClient.send(command);
-            return res.send({ ...resp, StackResources: data.StackResources });
+            const resData = await req.awsClient.send(command);
+            return res.send({ ...resp, StackResources: resData.StackResources });
 
         }
         res.send(res);
