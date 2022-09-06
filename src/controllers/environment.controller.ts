@@ -22,12 +22,59 @@ declare module "express-serve-static-core" {
 let router = Router();
 /**
  * @openapi
- * /:
+ * /setup-env:
  *   post:
  *     description: Setup environments for playground secarios!
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The user's id.
+ *                 example: user123
+ *               environment:
+ *                 type: string
+ *                 description: environment name
+ *                 example: test env
+ *               region:
+ *                 type: string
+ *                 description: aws region name
+ *                 example: us-east-1
+ *               resources:
+ *                 type: array
+ *                 description: Resource items
+ *                 items:
+ *                    type: object
+ * 
  *     responses:
  *       200:
  *         description: Returns a status of the request.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 StackId:
+ *                   type: string
+ *                   description: stack id
+ *                   example: arn:aws:cloudformation:xxx:stack/xxxx/dd500ed0-288b-11ed-a3a1-129093a8b44d
+ *                 iamUser:
+ *                   type: object
+ *                   descriotion: user login details
+ *                   properties:
+ *                     userName:
+ *                       type: string
+ *                       description: user Id
+ *                       example: testEnv-user123-1661881669838
+ *                     password:
+ *                       type: string
+ *                       description: user password
+ *                       example: testEnv-user123-1661881669838
+ * 
  */
 router.post('/setup-env', async (req: Request, res: Response) => {
     // a client can be shared by different commands.
@@ -107,6 +154,16 @@ router.post('/setup-env', async (req: Request, res: Response) => {
 
     }
 });
+
+/**
+ * @openapi
+ * /validate-env:
+ *   post:
+ *     description: Validate environments for playground secarios!
+ *     responses:
+ *       200:
+ *         description: Returns a status of the request.
+ */
 router.post('/validate-env', async (req: Request, res: Response) => {
     let { stackId } = req.body;
     if (!stackId) {
@@ -186,6 +243,16 @@ router.post('/env-res', async (req: Request, res: Response) => {
          **/
     }
 });
+
+/**
+ * @openapi
+ * /delete-env:
+ *   post:
+ *     description: Delete environments for playground secarios!
+ *     responses:
+ *       200:
+ *         description: Returns a status of the request.
+ */
 router.post('/delete-env', async (req: Request, res: Response) => {
     let { stackId, iamUserId } = req.body;
     if (!stackId) {

@@ -9,7 +9,8 @@ const openapiSpecification = swaggerJsdoc({
         info: {
             title: 'ThinkCloudly Playground App',
             version: '1.0.0',
-        }
+        },
+        servers: [{ url: "/.netlify/functions/api" }],
     },
     apis: [
         "**/*.ts"
@@ -18,10 +19,6 @@ const openapiSpecification = swaggerJsdoc({
 swaggerUi.generateHTML(openapiSpecification)
 let router = Router();
 router.get('/swagger.json', (req, res) => res.json(openapiSpecification));
-router.get('/', swaggerUi.setup(openapiSpecification))
-router.use('/', (req, res, next) => {
-    swaggerUi.setup(openapiSpecification)
-    next()
-})
 router.use('/', swaggerUi.serve);
+router.get('/', swaggerUi.setup(openapiSpecification))
 export default router;
