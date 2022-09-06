@@ -6,7 +6,6 @@ import { environmentController } from './controllers/environment.controller';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import serverless from 'serverless-http'
 
-import openApiRouter from './docs/openapi'
 
 dotenv.config();
 
@@ -34,7 +33,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server');
 });
 
-app.use('/.netlify/functions/api/docs', openApiRouter)
 app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
   req.awsClient = new CloudFormationClient({
     "credentials": {

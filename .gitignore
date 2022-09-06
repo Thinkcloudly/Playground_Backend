@@ -4,3 +4,4 @@ ignore/
 dist
 functions
 assets/
+www/swagger.json
