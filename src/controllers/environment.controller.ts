@@ -20,7 +20,15 @@ declare module "express-serve-static-core" {
     }
 }
 let router = Router();
-
+/**
+ * @openapi
+ * /:
+ *   post:
+ *     description: Setup environments for playground secarios!
+ *     responses:
+ *       200:
+ *         description: Returns a status of the request.
+ */
 router.post('/setup-env', async (req: Request, res: Response) => {
     // a client can be shared by different commands.
     let { environment, userId, region, resources } = req.body;

@@ -2,6 +2,7 @@
 [build]
   command = "npm install && npm run build"
   functions = "functions" #  netlify-lambda reads this
+  publish = "assets/"
 [[headers]]
   for = "/*"
   [headers.values]

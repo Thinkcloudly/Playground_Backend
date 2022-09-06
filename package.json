@@ -5,7 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "npx tsc && netlify-lambda build dist",
+		"cleanDirs": "rm -R assets",
+		"setupDirs": "mkdir  -p assets/.netlify/functions/api/docs && cp -R node_modules/swagger-ui-dist/** assets/.netlify/functions/api/docs",
+		"build": "npm run setupDirs &&npx tsc && netlify-lambda build dist",
 		"start": "node dist/index.js",
 		"serve": "netlify-lambda serve dist",
 		"dev": "concurrently \"npx tsc --watch\" \"nodemon -q start-local.js\"",
@@ -17,6 +19,7 @@
 		"@aws-sdk/client-cloudformation": "^3.137.0",
 		"@aws-sdk/client-ec2": "^3.145.0",
 		"@aws-sdk/client-iam": "^3.150.0",
+		"@vendia/serverless-express": "^4.10.1",
 		"aws-crt": "^1.14.0",
 		"aws-sdk": "^2.1183.0",
 		"body-parser": "^1.20.0",
