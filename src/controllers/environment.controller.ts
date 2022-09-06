@@ -161,9 +161,64 @@ router.post('/setup-env', async (req: Request, res: Response) => {
  * /validate-env:
  *   post:
  *     description: Validate environments for playground secarios!
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               stackId:
+ *                 type: string
+ *                 description: The aws stack id.
+ *                 example: arn:aws:cloudformation:us-east-1xxxstack/xxxx/b59bdac0-1cb2-11ed-9839-1247b67976eb
  *     responses:
  *       200:
  *         description: Returns a status of the request.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 StackStatus:
+ *                   type: string
+ *                   description: stack id
+ *                   example: CREATE_COMPLETE
+ *                 StackResources:
+ *                   type: array
+ *                   description: stack resources
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       StackName:
+ *                         type: string
+ *                         description: stack the resource belongs to
+ *                         example: environment-testEnv-user123-1661881669623
+ *                       StackId:
+ *                         type: string
+ *                         description: The aws stack id.
+ *                         example: arn:aws:cloudformation:us-east-1xxxstack/xxxx/b59bdac0-1cb2-11ed-9839-1247b67976eb
+ *                       LogicalResourceId:
+ *                         type: string
+ *                         description: The aws Logical Resource Id.
+ *                         example: testEnvuser123Ts16618816696230
+ *                       PhysicalResourceId:
+ *                         type: string
+ *                         description: The aws Physical Resource Id.
+ *                         example: i-0141f0a28108e3f93
+ *                       ResourceType:
+ *                         type: string
+ *                         description: aws resource type.
+ *                         example: AWS::EC2::Instance
+ *                       ResourceStatus:
+ *                         type: string
+ *                         description: aws resource status.
+ *                         example: CREATE_COMPLETE
+ * 
+ * 
+ * 
+ * 
+ *                   
  */
 router.post('/validate-env', async (req: Request, res: Response) => {
     let { stackId } = req.body;
