@@ -23,7 +23,7 @@ const config = {
 					title: "ThinkCloudly Playground App",
 					version: "1.0.0",
 				},
-				servers: [{ url: "https://thinkcloudly-playground.netlify.app/.netlify/functions/api" }],
+				servers: [{ url: "/.netlify/functions/api" }],
 			},
 			apis: ["./src/**/*.ts"],
 		}),
