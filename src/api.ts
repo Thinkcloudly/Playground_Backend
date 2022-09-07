@@ -25,9 +25,6 @@ app.use('/', (req, res, next) => {
   res.append('Access-Control-Allow-Headers', 'Content-Type');
   next();
 })
-app.get('/', (req: Request, res: Response) => {
-  res.send('Express + TypeScript Server');
-});
 
 app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
   req.awsClient = new CloudFormationClient({
