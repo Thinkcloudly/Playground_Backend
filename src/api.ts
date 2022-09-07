@@ -6,7 +6,6 @@ import { environmentController } from './controllers/environment.controller';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import serverless from 'serverless-http'
 
-
 dotenv.config();
 
 const app: Express = express();
@@ -19,9 +18,6 @@ app.use(json())
 app.use(cors({
   origin: '*'
 }))
-
-
-
 
 app.use('/', (req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*']);
