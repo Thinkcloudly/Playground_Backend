@@ -9,7 +9,7 @@ const config = {
 	target: "node",
 	output: {
 		filename: "api.js",
-		path: path.resolve(__dirname, "functions"),
+		path: path.resolve(__dirname, "dist"),
 	},
 	devServer: {
 		open: true,
