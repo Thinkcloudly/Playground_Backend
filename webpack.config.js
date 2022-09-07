@@ -9,7 +9,7 @@ const config = {
 	target: "node",
 	output: {
 		filename: "app.js",
-		path: path.resolve(__dirname, "dist"),
+		path: path.resolve(__dirname, "build"),
 	},
 	devServer: {
 		open: true,
