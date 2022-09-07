@@ -8,6 +8,7 @@ const config = {
 	entry: "./src/api.ts",
 	target: "node",
 	output: {
+		filename: "app.js",
 		path: path.resolve(__dirname, "functions"),
 	},
 	devServer: {
