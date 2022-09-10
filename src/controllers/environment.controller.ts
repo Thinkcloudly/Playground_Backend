@@ -117,7 +117,7 @@ router.post('/setup-env', async (req: Request, res: Response) => {
             UserName: `${Date.now()}`
         });
         const createUserresponse = await iamClient.send(createUsercommand);
-        let password = `${Date.now()}`
+        let password = `Pass-${userId}-${Date.now()}`
         const createLoginProfileCommand = new CreateLoginProfileCommand({
             UserName: createUserresponse.User.UserName,
             Password: password,
