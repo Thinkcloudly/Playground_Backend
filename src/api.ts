@@ -5,6 +5,7 @@ import { urlencoded, json } from 'body-parser';
 import { environmentController } from './controllers/environment.controller';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import serverless from 'serverless-http'
+import { scenarioControllers } from './controllers/validations';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
   next()
 });
 app.use('/.netlify/functions/api', environmentController);
+app.use('/.netlify/functions/api', scenarioControllers);
 
 
 module.exports = app;

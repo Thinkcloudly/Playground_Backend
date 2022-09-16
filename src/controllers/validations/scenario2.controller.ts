@@ -1,6 +1,6 @@
 import { DescribeStackResourcesCommand, DescribeStackResourcesCommandInput } from '@aws-sdk/client-cloudformation';
 import express, { Router, Request, Response } from 'express';
-import { DescribeVolumesCommand, DescribeVolumesCommandInput, EC2Client } from '@aws-sdk/client-ec2'
+import { DescribeInstanceAttributeCommand, DescribeInstanceAttributeCommandInput, DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeVolumesCommand, DescribeVolumesCommandInput, EC2Client } from '@aws-sdk/client-ec2'
 let router = Router();
 
 router.post('/validate-scenario-2', async (req: Request, res: Response) => {
@@ -21,6 +21,7 @@ router.post('/validate-scenario-2', async (req: Request, res: Response) => {
 
         // });
         console.log(data);
+        // return res.send(data);
 
         let Resources: any[] = data.StackResources.map(element => {
             return {
@@ -33,7 +34,6 @@ router.post('/validate-scenario-2', async (req: Request, res: Response) => {
         })
 
         let ec2Id = Resources.find(x => x.ResourceType === "AWS::EC2::Instance")
-        let ebsId = Resources.find(x => x.ResourceType === "AWS::EC2::Volume")
 
         let ec2Client = new EC2Client({
             "credentials": {
@@ -45,30 +45,28 @@ router.post('/validate-scenario-2', async (req: Request, res: Response) => {
 
 
 
-        let scParams: DescribeVolumesCommandInput = {
-            MaxResults: 100,
-            Filters: [
-                {
-                    "Name": "attachment.instance-id",
-                    "Values": [ec2Id.PhysicalResourceId]
-                }
-            ]
+        let scParams: DescribeInstancesCommandInput = {
+            InstanceIds: [ec2Id.PhysicalResourceId]
         }
-        let scCmd = new DescribeVolumesCommand(scParams)
+        let scCmd = new DescribeInstancesCommand(scParams)
         let results = await ec2Client.send(scCmd);
         console.log(results);
-        if (results.Volumes.find(x => x.VolumeId == ebsId.PhysicalResourceId)) {
+
+        let ipAddress = results.Reservations[0].Instances[0].PublicIpAddress
+        try {
+            await fetch(`http://${ipAddress}:80`)
             return res.send({
                 status: "success",
-                message: "scenario successfully completed"
+                message: "scenario completed",
+            })
+        }
+        catch (err) {
+            return res.send({
+                status: "failed",
+                message: "scenario not completed",
             })
         }
 
-        return res.send({
-            status: "failed",
-            message: "scenario not completed",
-            results
-        })
         // process data.
     } catch (error: any) {
         // error handling.

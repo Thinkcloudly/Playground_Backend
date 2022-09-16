@@ -11,8 +11,15 @@ import {
     DescribeStackResourcesCommandInput,
     DescribeStackResourcesCommand
 } from "@aws-sdk/client-cloudformation";
-import { IAMClient, CreateUserCommand, CreateLoginProfileCommand, DeleteUserCommand, DeleteLoginProfileCommand, AttachUserPolicyCommand, DetachUserPolicyCommand } from "@aws-sdk/client-iam"; // ES Modules 
-import { scenario1Controller } from './validations/scenario1.controller';
+import {
+    IAMClient,
+    CreateUserCommand,
+    CreateLoginProfileCommand,
+    DeleteUserCommand,
+    DeleteLoginProfileCommand,
+    AttachUserPolicyCommand,
+    DetachUserPolicyCommand
+} from "@aws-sdk/client-iam"; // ES Modules 
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -20,6 +27,19 @@ declare module "express-serve-static-core" {
     }
 }
 let router = Router();
+
+function updateRef(obj: any, mapping: (ref: string) => string) {
+    for (var k in obj) {
+        if (typeof obj[k] === "object" && obj[k] !== null)
+            updateRef(obj[k], mapping);
+        else {
+            // do something... 
+            if (typeof obj[k] === 'string' && (k === 'Ref' || k === 'DependsOn')) {
+                obj[k] = mapping(obj[k])
+            }
+        }
+    }
+}
 
 /**
  * @openapi
@@ -88,54 +108,60 @@ router.post('/setup-env', async (req: Request, res: Response) => {
     let template: any = {
         Resources: {}
     };
+    let Id = `${req.body.environment}${req.body.userId}Ts${Date.now()}`;
     (resources as string[]).forEach((resource: any, i) => {
-        template.Resources[`${req.body.environment}${req.body.userId}Ts${Date.now()}${i}`] = {
+        template.Resources[`${resource.id || ''}${Id}`] = {
             Type: resource.type,
             Properties: {
                 ...(resource.properties || {}),
             }
         }
+        if (resource.dependsOn) {
+            template.Resources[`${resource.id || ''}${Id}`].DependsOn = resource.dependsOn
+        }
     })
+    let username = `${Date.now()}`
+    let password = `Pass-${userId}-${Date.now()}`
+    template.Resources[`iamuser${Id}`] = {
+        Type: "AWS::IAM::User",
+        Properties: {
+            UserName: username,
+            LoginProfile: {
+                Password: password,
+                PasswordResetRequired: false
+            },
+            ManagedPolicyArns: ["arn:aws:iam::aws:policy/PowerUserAccess"],
+            // PermissionsBoundary: "arn:aws:iam::aws:policy/PowerUserAccess",
+        }
+    }
+    updateRef(template, (ref) => `${ref}${Id}`);
+
     const params: CreateStackCommandInput = {
-        StackName: `environment-${req.body.environment}-${req.body.userId}-${Date.now()}`,
+        StackName: `tc-user-env-${req.body.environment}-${req.body.userId}-${Date.now()}`,
         OnFailure: "DELETE",
-        TemplateBody: JSON.stringify(template)
+        TemplateBody: JSON.stringify(template),
+        Tags: [
+            {
+                Key: "STACK TYPE",
+                Value: "TC:USER:ENV"
+            },
+            {
+                Key: "STACK USER",
+                Value: username
+            }
+        ],
+        Capabilities: [
+            'CAPABILITY_NAMED_IAM'
+        ]
     };
     const command = new CreateStackCommand(params);
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-
-        const iamClient = new IAMClient({
-            "credentials": {
-                accessKeyId: `${process.env.AWS_ID}`,
-                secretAccessKey: `${process.env.AWS_SECRET}`
-            },
-            region: `${process.env.AWS_ENV_REGION}`
-        });
-        const createUsercommand = new CreateUserCommand({
-            UserName: `${Date.now()}`
-        });
-        const createUserresponse = await iamClient.send(createUsercommand);
-        let password = `Pass-${userId}-${Date.now()}`
-        const createLoginProfileCommand = new CreateLoginProfileCommand({
-            UserName: createUserresponse.User.UserName,
-            Password: password,
-            PasswordResetRequired: false
-        });
-        const createLoginProfileResponse = await iamClient.send(createLoginProfileCommand);
-        console.log(createLoginProfileResponse);
-        const attachUserPolicyCommand = new AttachUserPolicyCommand({
-            UserName: createUserresponse.User.UserName,
-            PolicyArn: "arn:aws:iam::aws:policy/PowerUserAccess"
-        });
-        const attachUserPolicyResponse = await iamClient.send(attachUserPolicyCommand);
-        console.log(attachUserPolicyResponse);
-
         res.send({
             ...data,
             iamUser: {
-                userName: createUserresponse.User.UserName,
+                userName: username,
                 password: password
             }
         });
@@ -364,8 +390,6 @@ router.post('/delete-env', async (req: Request, res: Response) => {
         res.status(500).send({ ...error })
     }
 });
-
-router.use("/", scenario1Controller);
 
 
 export default router;
