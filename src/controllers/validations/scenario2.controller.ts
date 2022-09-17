@@ -52,7 +52,8 @@ router.post('/', async (req: Request, res: Response) => {
         let results = await ec2Client.send(scCmd);
         console.log(results);
 
-        let ipAddress = results.Reservations[0].Instances[0].PublicIpAddress
+        let ipAddress = results.Reservations[0].Instances[0].PublicDnsName
+        console.log(results.Reservations[0].Instances[0]);
         try {
             await fetch(`http://${ipAddress}:80`)
             return res.send({
@@ -64,6 +65,7 @@ router.post('/', async (req: Request, res: Response) => {
             return res.send({
                 status: "failed",
                 message: "scenario not completed",
+                err
             })
         }
 
