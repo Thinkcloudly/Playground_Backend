@@ -11,4 +11,4 @@
     Access-Control-Allow-Methods = "GET,PUT,POST,DELETE,OPTIONS"
 
 [functions."cleaner"]
-schedule = "@hourly"
+  schedule = "@hourly"
