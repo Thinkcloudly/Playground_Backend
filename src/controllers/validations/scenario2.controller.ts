@@ -55,10 +55,11 @@ router.post('/', async (req: Request, res: Response) => {
         let ipAddress = results.Reservations[0].Instances[0].PublicDnsName
         console.log(results.Reservations[0].Instances[0]);
         try {
-            await fetch(`http://${ipAddress}:80`)
+            let resp = await fetch(`http://${ipAddress}:80`)
             return res.send({
                 status: "success",
                 message: "scenario completed",
+                resp
             })
         }
         catch (err) {
