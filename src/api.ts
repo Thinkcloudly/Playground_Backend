@@ -39,7 +39,7 @@ app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
   next()
 });
 app.use('/.netlify/functions/api', environmentController);
-app.use('/.netlify/functions/api', scenarioControllers);
+app.use('/.netlify/functions/api/validate-scenario', scenarioControllers);
 
 
 module.exports = app;

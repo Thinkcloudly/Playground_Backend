@@ -3,7 +3,7 @@ import express, { Router, Request, Response } from 'express';
 import { DescribeVolumesCommand, DescribeVolumesCommandInput, EC2Client } from '@aws-sdk/client-ec2'
 let router = Router();
 
-router.post('/validate-scenario-1', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
     let { stackId } = req.body;
     if (!stackId) {
         res.status(400).send('Missing environment or userId');
