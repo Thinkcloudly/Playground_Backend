@@ -1,6 +1,6 @@
 import { DescribeStackResourcesCommand, DescribeStackResourcesCommandInput } from '@aws-sdk/client-cloudformation';
 import express, { Router, Request, Response } from 'express';
-import { DescribeInstanceAttributeCommand, DescribeInstanceAttributeCommandInput, DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeVolumesCommand, DescribeVolumesCommandInput, EC2Client } from '@aws-sdk/client-ec2'
+import { DescribeInstanceAttributeCommand, DescribeInstanceAttributeCommandInput, DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeSecurityGroupRulesCommandInput, DescribeSecurityGroupsCommand, DescribeSecurityGroupsCommandInput, DescribeVolumesCommand, DescribeVolumesCommandInput, EC2Client } from '@aws-sdk/client-ec2'
 let router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
@@ -33,7 +33,7 @@ router.post('/', async (req: Request, res: Response) => {
             }
         })
 
-        let ec2Id = Resources.find(x => x.ResourceType === "AWS::EC2::Instance")
+        let resId = Resources.find(x => x.ResourceType === "AWS::EC2::SecurityGroup")
 
         let ec2Client = new EC2Client({
             "credentials": {
@@ -45,31 +45,26 @@ router.post('/', async (req: Request, res: Response) => {
 
 
 
-        let scParams: DescribeInstancesCommandInput = {
-            InstanceIds: [ec2Id.PhysicalResourceId]
+        let scParams: DescribeSecurityGroupsCommandInput = {
+            GroupIds: [resId.PhysicalResourceId]
         }
-        let scCmd = new DescribeInstancesCommand(scParams)
+        let scCmd = new DescribeSecurityGroupsCommand(scParams)
         let results = await ec2Client.send(scCmd);
-        console.log(results);
-
-        let ipAddress = results.Reservations[0].Instances[0].PublicDnsName
-        console.log(results.Reservations[0].Instances[0]);
-        try {
-            let resp = await fetch(`http://${ipAddress}:80`)
+        let inboundRules = results.SecurityGroups[0].IpPermissions;
+        console.log(inboundRules);
+        if (inboundRules.find(rule => rule.FromPort >= 80 && rule.ToPort <= 80 && rule.IpProtocol == 'tcp')) {
             return res.send({
                 status: "success",
                 message: "scenario completed",
-                resp
             })
         }
-        catch (err) {
+        else {
             return res.send({
                 status: "failed",
                 message: "scenario not completed",
-                err
+
             })
         }
-
         // process data.
     } catch (error: any) {
         // error handling.
