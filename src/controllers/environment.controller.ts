@@ -349,32 +349,6 @@ router.post('/delete-env', async (req: Request, res: Response) => {
     // async/await.
     try {
         const data = await req.awsClient.send(command);
-        const iamClient = new IAMClient({
-            "credentials": {
-                accessKeyId: `${process.env.AWS_ID}`,
-                secretAccessKey: `${process.env.AWS_SECRET}`
-            },
-            region: `${process.env.AWS_ENV_REGION}`
-        });
-
-        const deleteLoginProfileCommand = new DeleteLoginProfileCommand({
-            UserName: `${iamUserId}`
-        });
-        const deleteLoginProfileResponse = await iamClient.send(deleteLoginProfileCommand);
-        console.log(deleteLoginProfileResponse);
-
-        const detachPolicyCommand = new DetachUserPolicyCommand({
-            UserName: `${iamUserId}`,
-            PolicyArn: "arn:aws:iam::aws:policy/PowerUserAccess"
-        });
-        const detachPolicyResponse = await iamClient.send(detachPolicyCommand);
-        console.log(detachPolicyResponse);
-
-        const deleteUserCommand = new DeleteUserCommand({
-            UserName: `${iamUserId}`
-        });
-        const deleteUserResponse = await iamClient.send(deleteUserCommand);
-        console.log(deleteUserResponse);
         return res.send({ ...data });
         // process data.
     } catch (error: any) {
