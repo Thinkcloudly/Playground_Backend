@@ -1,4 +1,5 @@
 var cors = require('cors')
+const path = require('path')
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { urlencoded, json } from 'body-parser';
@@ -27,7 +28,7 @@ app.use('/', (req, res, next) => {
   next();
 })
 
-app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
+app.use('/api', (req: Request, res: Response, next) => {
   req.awsClient = new CloudFormationClient({
     "credentials": {
       accessKeyId: `${process.env.AWS_ID}`,
@@ -38,9 +39,10 @@ app.use('/.netlify/functions/api', (req: Request, res: Response, next) => {
   req.awsClient.config.logger = console;
   next()
 });
-app.use('/.netlify/functions/api', environmentController);
-app.use('/.netlify/functions/api/validate-scenario', scenarioControllers);
-
+app.use('/api', environmentController);
+app.use('/api/validate-scenario', scenarioControllers);
+app.use('/api/docs/', express.static(path.join(__dirname, '../www')))
 
 module.exports = app;
 module.exports.handler = serverless(app);
+

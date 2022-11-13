@@ -1,0 +1,9 @@
+node_modules/
+.env
+ignore/
+dist
+functions
+assets/
+www/swagger.json
+build
+publish-container.sh
