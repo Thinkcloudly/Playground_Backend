@@ -38,7 +38,7 @@ metadata:
   labels:
     app: core-playground-backend
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: core-playground-backend
